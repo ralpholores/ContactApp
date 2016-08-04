@@ -12,6 +12,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.client.ChildEventListener;
@@ -25,19 +26,22 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity{
 
     private EditText mFirstName,mLastName,mContactNo;
-    private Button mBtnAdd;
+    private TextView mTxtView;
+    private Button mBtnAdd,mBtnDel;
     private ListView mListView;
 
-    ArrayList<String> mContacts = new ArrayList<>();
+    ArrayList<Contact> mContacts = new ArrayList<>();
 
     String firstName,lastName,contactNo;
     Firebase mRef;
-    Contact[] contact = new Contact[10];
+    Contact contact = new Contact();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,12 +51,14 @@ public class MainActivity extends AppCompatActivity{
         Firebase.setAndroidContext(this);
 
 
-        mRef = new Firebase("https://contactapp-556c1.firebaseio.com/");
+        mRef = new Firebase("https://contactapp-556c1.firebaseio.com/Contacts");
         Toast.makeText(this,""+mRef,Toast.LENGTH_SHORT).show();
+        mTxtView = (TextView) findViewById(R.id.txtView);
         mFirstName = (EditText) findViewById(R.id.firstName);
         mLastName = (EditText) findViewById(R.id.lastName);
         mContactNo = (EditText) findViewById(R.id.contact);
-        mBtnAdd = (Button) findViewById(R.id.btn);
+        mBtnAdd = (Button) findViewById(R.id.btnAdd);
+        mBtnDel = (Button) findViewById(R.id.btnDel);
         mListView = (ListView) findViewById(R.id.listView);
 
 
@@ -61,47 +67,42 @@ public class MainActivity extends AppCompatActivity{
         mBtnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Firebase contactRef = mRef.child("Contacts");
                 firstName = mFirstName.getText().toString();
                 lastName = mLastName.getText().toString();
                 contactNo = mContactNo.getText().toString();
-                contact[0] = new Contact(firstName,lastName,contactNo);
-                Map<String,Contact[]> contacts = new HashMap<String, Contact[]>();
-                contacts.put("Contacts",contact);
+                String key = contactRef.push().getKey();
+                Contact contact = new Contact(firstName,lastName,contactNo);
                 Toast.makeText(getApplicationContext(),"asdasdsa"+firstName,Toast.LENGTH_SHORT).show();
-                mRef.child("Contacts").setValue(contact);
+                contactRef.child(key).setValue(contact);
                 mFirstName.getText().clear();
                 mLastName.getText().clear();
                 mContactNo.getText().clear();
                 mFirstName.setFocusable(true);
+
+                mTxtView.setText("OBJECT: " + contact.getFirst_name());
+
             }
         });
+
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         Firebase contactRef = mRef.child("Contacts");
-
-        contactRef.addChildEventListener(new ChildEventListener() {
+        contactRef.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Map<String, Object> newContact = (Map<String, Object>)dataSnapshot.getValue();
-
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Iterable<DataSnapshot> snapshotIterator = dataSnapshot.getChildren();
+                Iterator<DataSnapshot> iterator = snapshotIterator.iterator();
+                while (iterator.hasNext()){
+                    Contact value = iterator.next().getValue(Contact.class);
+                    mContacts.add(value);
+                }
+                for(int i = mContacts.size() - 1;i > 0;i--){
+                    mTxtView.setText(""+mContacts.get(i).getFirst_name() + mContacts.get(i).getLast_name() + mContacts.get(i).getContact_number());
+                }
             }
 
             @Override
@@ -110,28 +111,4 @@ public class MainActivity extends AppCompatActivity{
             }
         });
     }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-
 }

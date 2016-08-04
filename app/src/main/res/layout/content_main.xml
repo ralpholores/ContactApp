@@ -13,6 +13,10 @@
     tools:showIn="@layout/activity_main"
     android:orientation="vertical">
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/txtView"/>
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -32,8 +36,13 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/btn"
+        android:id="@+id/btnAdd"
         android:text="@string/add"/>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/btnDel"
+        android:text="Delete Contact"/>
     <ListView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
