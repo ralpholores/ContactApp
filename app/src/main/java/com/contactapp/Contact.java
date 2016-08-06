@@ -8,12 +8,12 @@ import com.google.firebase.database.IgnoreExtraProperties;
 @IgnoreExtraProperties
 public class Contact {
 
-    public String last_name;
+
     public String first_name;
     public String contact_number;
 
-    public Contact(String last_name, String first_name, String contact_number) {
-        this.last_name = last_name;
+    public Contact( String first_name, String contact_number) {
+
         this.first_name = first_name;
         this.contact_number = contact_number;
     }
@@ -21,13 +21,6 @@ public class Contact {
     public Contact() {
     }
 
-    public String getLast_name() {
-        return last_name;
-    }
-
-    public void setLast_name(String last_name) {
-        this.last_name = last_name;
-    }
 
     public String getFirst_name() {
         return first_name;
